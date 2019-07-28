@@ -4,6 +4,7 @@ Vue.component('snake', {
             showComponent: true,
             direction: 'left',
             startTimeInterval: 120,
+            score: 0,
             snake: {
                 shakeLength: 5,
                 body: [this.shakeLength]
@@ -20,9 +21,9 @@ Vue.component('snake', {
     },
 
     methods: {
-        /*
-        * Инициализация игрового поля.
-        */
+        /**
+         * Инициализация игрового поля.
+         */
         initField: function () {
             let self = this;
 
@@ -62,9 +63,9 @@ Vue.component('snake', {
             }
         },
 
-        /*
-        * Инициализация змейки.
-        */
+        /**
+         * Инициализация змейки.
+         */
         initSnake: function () {
             let startRow = this.field.fieldRows / 2;
             let startCell = this.field.fieldCells / 2;
@@ -78,9 +79,9 @@ Vue.component('snake', {
             }
         },
 
-        /*
-        * Инициализация точки.
-        */
+        /**
+         * Инициализация точки.
+         */
         initDot: function () {
             let row;
             let cell;
@@ -100,16 +101,16 @@ Vue.component('snake', {
             this.dot.isRendered = false;
         },
 
-        /*
-        * Старт игры.
-        */
-        startGame: function (event) {
+        /**
+         * Старт игры.
+         */
+        startGame: function () {
             setInterval(this.tick, this.startTimeInterval);
         },
 
-        /*
-        * Логика нового кадра.
-        */
+        /**
+         * Логика нового кадра.
+         */
         tick: function () {
             let newBody = [this.snake.shakeLength];
 
@@ -149,12 +150,18 @@ Vue.component('snake', {
                 }
             }
 
+            // Если съели точку, добавляем очки.
+            if (newBody[0].row === this.dot.row && newBody[0].cell === this.dot.cell) {
+                this.score += 10;
+            }
+
+            this.collisionCheck(newBody);
             this.renderField(newBody);
         },
 
-        /*
-        * Отрисовываем поле.
-        */
+        /**
+         * Отрисовываем поле.
+         */
         renderField: function (newBody) {
             // Рисуем точку если требуется.
             if (!this.dot.isRendered) {
@@ -188,9 +195,54 @@ Vue.component('snake', {
             }
         },
 
-        /*
-        * Задаем статус ячейки.
-        */
+        /**
+         * Проверка на столкновения.
+         */
+        collisionCheck: function (newBody) {
+            if (newBody[0].row < 0 || newBody[0].row >= this.field.fieldRows) {
+                this.resetSnake(newBody);
+            }
+
+            if (newBody[0].cell < 0 || newBody[0].cell >= this.field.fieldCells) {
+                this.resetSnake(newBody);
+            }
+
+            for (let i = 0; i < this.snake.shakeLength; i++) {
+                for (let j = 0; j < this.snake.shakeLength; j++) {
+                    if (j === i) {
+                        continue;
+                    }
+
+                    if (newBody[i].row === newBody[j].row &&
+                        newBody[i].cell === newBody[j].cell) {
+                        this.resetSnake(newBody);
+
+                        break;
+                    }
+                }
+            }
+        },
+
+        /**
+         * Сбрасываем змейку.
+         */
+        resetSnake: function (newBody) {
+            for (let i = 0; i < this.snake.shakeLength; i++) {
+                this.setCell(this.snake.body[i].row, this.snake.body[i].cell, 'none');
+
+                this.snake.body[i].row = this.field.fieldRows / 2;
+                this.snake.body[i].cell = this.field.fieldRows / 2 + i;
+
+                newBody[i].row = this.field.fieldRows / 2;
+                newBody[i].cell = this.field.fieldRows / 2 + i;
+            }
+
+            this.direction = 'left';
+        },
+
+        /**
+         * Задаем статус ячейки.
+         */
         setCell: function (row, cell, status) {
             let changedRow = this.field.cells[row];
             Vue.set(changedRow, cell, {status: status});
@@ -198,13 +250,14 @@ Vue.component('snake', {
         }
     },
 
-    /*
-    * Инициализация.
-    */
+    /**
+     * Инициализация.
+     */
     beforeMount() {
         this.initField();
         this.initSnake();
         this.initDot();
         this.startGame();
     }
-});
+})
+;
