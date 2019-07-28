@@ -3,10 +3,5 @@ Vue.component('login-form', {
         return {
             showComponent: false
         }
-    },
-    methods: {
-        start: function (event) {
-            debugger;
-        }
     }
 });

@@ -15,8 +15,41 @@ Vue.component('snake', {
             }
         }
     },
+
     methods: {
+        /*
+        * Инициализация игрового поля.
+        */
         initField: function () {
+            let self = this;
+
+            document.addEventListener('keyup', function (evt) {
+                debugger;
+
+                switch (evt.keyCode) {
+                    case 37:
+                        if (self.direction !== 'right') {
+                            self.direction = 'left';
+                        }
+                        break;
+                    case 38:
+                        if (self.direction !== 'bottom') {
+                            self.direction = 'top';
+                        }
+                        break;
+                    case 39:
+                        if (self.direction !== 'left') {
+                            self.direction = 'right';
+                        }
+                        break;
+                    case 40:
+                        if (self.direction !== 'top') {
+                            self.direction = 'bottom';
+                        }
+                        break;
+                }
+            });
+
             for (let row = 0; row < this.field.fieldRows; row++) {
                 this.field.cells[row] = [this.field.fieldCells];
 
@@ -27,6 +60,10 @@ Vue.component('snake', {
                 }
             }
         },
+
+        /*
+        * Инициализация змейки.
+        */
         initSnake: function () {
             let startRow = this.field.fieldRows / 2;
             let startCell = this.field.fieldCells / 2;
@@ -39,6 +76,10 @@ Vue.component('snake', {
                 };
             }
         },
+
+        /*
+        * Инициализация точки.
+        */
         initDot: function () {
             let row;
             let cell;
@@ -55,13 +96,18 @@ Vue.component('snake', {
 
             this.field.cells[row][cell].status = 'dot';
         },
+
+        /*
+        * Старт игры.
+        */
         startGame: function (event) {
             setInterval(this.tick, this.startTimeInterval);
         },
-        tick: function () {
-            debugger;
 
-            // Пересчитываем координаты тела змейки.
+        /*
+        * Логика нового кадра.
+        */
+        tick: function () {
             let newBody = [this.snake.shakeLength];
 
             // На основенаправления задаем новые координаты головы
@@ -92,6 +138,7 @@ Vue.component('snake', {
                     break;
             }
 
+            // Пересчитываем координаты тела змейки.
             for (let snakeBody = 1; snakeBody < this.snake.body.length; snakeBody++) {
                 newBody[snakeBody] = {
                     row: this.snake.body[snakeBody - 1].row,
@@ -101,6 +148,10 @@ Vue.component('snake', {
 
             this.renderField(newBody);
         },
+
+        /*
+        * Отрисовываем поле.
+        */
         renderField: function (newBody) {
             let oldCellRow = this.snake.body[this.snake.shakeLength - 1].row;
             let oldCell = this.snake.body[this.snake.shakeLength - 1].cell;
@@ -115,12 +166,20 @@ Vue.component('snake', {
                 this.setCell(row, cell, 'snake');
             }
         },
+
+        /*
+        * Задаем статус ячейки.
+        */
         setCell: function (row, cell, status) {
             let changedRow = this.field.cells[row];
             Vue.set(changedRow, cell, {status: status});
             Vue.set(this.field.cells, row, changedRow);
         }
     },
+
+    /*
+    * Инициализация.
+    */
     beforeMount() {
         this.initField();
         this.initSnake();
