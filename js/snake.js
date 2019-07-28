@@ -2,6 +2,7 @@ Vue.component('snake', {
     data: function () {
         return {
             showComponent: true,
+            setInterval: null,
             direction: 'left',
             startTimeInterval: 120,
             score: 0,
@@ -16,6 +17,17 @@ Vue.component('snake', {
                 fieldRows: 50,
                 fieldCells: 50,
                 cells: [this.fieldRows]
+            }
+        }
+    },
+    watch: {
+        score: function (val) {
+            if (val % 100 === 0) {
+                debugger;
+
+                clearInterval(this.setInterval);
+                this.startTimeInterval -= 20;
+                this.startGame();
             }
         }
     },
@@ -105,7 +117,7 @@ Vue.component('snake', {
          * Старт игры.
          */
         startGame: function () {
-            setInterval(this.tick, this.startTimeInterval);
+            this.setInterval = setInterval(this.tick, this.startTimeInterval);
         },
 
         /**
