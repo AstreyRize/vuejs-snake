@@ -8,6 +8,9 @@ Vue.component('snake', {
                 shakeLength: 5,
                 body: [this.shakeLength]
             },
+            dot: {
+                isRendered: false
+            },
             field: {
                 fieldRows: 50,
                 fieldCells: 50,
@@ -24,8 +27,6 @@ Vue.component('snake', {
             let self = this;
 
             document.addEventListener('keyup', function (evt) {
-                debugger;
-
                 switch (evt.keyCode) {
                     case 37:
                         if (self.direction !== 'right') {
@@ -94,7 +95,9 @@ Vue.component('snake', {
                 cell = Math.floor(Math.random() * (+maxCell - +minCell)) + +minCell;
             } while (this.field.cells[row][cell].status === 'snake');
 
-            this.field.cells[row][cell].status = 'dot';
+            this.dot.row = row;
+            this.dot.cell = cell;
+            this.dot.isRendered = false;
         },
 
         /*
@@ -153,12 +156,30 @@ Vue.component('snake', {
         * Отрисовываем поле.
         */
         renderField: function (newBody) {
+            // Рисуем точку если требуется.
+            if (!this.dot.isRendered) {
+                this.setCell(this.dot.row, this.dot.cell, 'dot');
+            }
+
             let oldCellRow = this.snake.body[this.snake.shakeLength - 1].row;
             let oldCell = this.snake.body[this.snake.shakeLength - 1].cell;
 
-            this.setCell(oldCellRow, oldCell, 'none');
-            this.snake.body = newBody;
+            // Если точка совпадает с концом змейки, удлиняем змейку.
+            if (oldCellRow === this.dot.row && oldCell === this.dot.cell) {
+                this.snake.body = newBody;
+                this.snake.shakeLength++;
+                this.snake.body.push({
+                    row: oldCellRow,
+                    cell: oldCell
+                });
 
+                this.initDot();
+            } else {
+                this.setCell(oldCellRow, oldCell, 'none');
+                this.snake.body = newBody;
+            }
+
+            // Перерисовываем змейку.
             for (let snakeBody = 0; snakeBody < this.snake.shakeLength; snakeBody++) {
                 let row = this.snake.body[snakeBody].row;
                 let cell = this.snake.body[snakeBody].cell;
