@@ -22,12 +22,11 @@
             crossorigin="anonymous"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 </head>
 <body>
 <div id="app">
     <login-form inline-template>
-        <div class="login-form">
+        <div v-if="showComponent" class="login-form">
             <div class="container">
                 <div class="input-group input-group-sm mb-3">
                     <div class="input-group-prepend">
@@ -35,13 +34,24 @@
                     </div>
                     <input type="text" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
                 </div>
-                <button type="button" class="btn btn-dark float-sm-right">Start</button>
+                <button type="button" class="btn btn-dark float-sm-right" @click="start">Start</button>
             </div>
         </div>
     </login-form>
+    <snake inline-template>
+        <div v-if="showComponent" class="snake">
+            <table>
+                <tr v-for="row in field.cells">
+                    <td v-for="cell in row" :class="cell.status">
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </snake>
 </div>
 
 <script src="js/login-form.js"></script>
+<script src="js/snake.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

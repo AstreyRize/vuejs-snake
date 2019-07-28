@@ -12,3 +12,27 @@
     border-radius: 10px;
     padding: 50px;
 }
+
+.snake table {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20%;
+}
+
+.snake td {
+    width: 10px;
+    height: 10px;
+    border: 1px solid white;
+}
+
+.snake .none {
+    background-color: #b7b7b7;
+}
+
+.snake .snake {
+    background-color: black;
+}
+
+.snake .dot {
+    background-color: red;
+}

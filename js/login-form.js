@@ -1,7 +1,12 @@
 Vue.component('login-form', {
     data: function () {
         return {
-            count: 0
+            showComponent: false
+        }
+    },
+    methods: {
+        start: function (event) {
+            debugger;
         }
     }
 });
