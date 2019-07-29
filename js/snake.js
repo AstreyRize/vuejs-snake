@@ -31,7 +31,7 @@ Vue.component('snake', {
                 this.startGame();
             }
         },
-        // Следим за жизнями
+        // Следим за жизнями.
         lives: function (val) {
             if (val <= -1) {
                 clearInterval(this.setInterval);
@@ -48,8 +48,6 @@ Vue.component('snake', {
             let self = this;
 
             document.addEventListener('keyup', function (evt) {
-                debugger;
-
                 switch (evt.keyCode) {
                     // Пробел (пауза).
                     case 32:
@@ -181,7 +179,7 @@ Vue.component('snake', {
         tick: function () {
             let newBody = [this.snake.shakeLength];
 
-            // На основенаправления задаем новые координаты головы
+            // На основе направления задаем новые координаты головы
             switch (this.direction) {
                 case 'top':
                     newBody[0] = {
@@ -234,7 +232,7 @@ Vue.component('snake', {
                 return;
             }
 
-            // Рисуем точку если требуется.
+            // Рисуем точку, если требуется.
             if (!this.dot.isRendered) {
                 this.setCell(this.dot.row, this.dot.cell, 'dot');
             }
@@ -274,19 +272,19 @@ Vue.component('snake', {
                 return;
             }
 
-            // Столкновение с потолком или полом
+            // Столкновение с потолком или полом.
             if (newBody[0].row < 0 || newBody[0].row >= this.field.fieldRows) {
                 this.lives--;
                 this.resetSnake(newBody);
             }
 
-            // Столкноевение со стенами
+            // Столкновение со стенами.
             if (newBody[0].cell < 0 || newBody[0].cell >= this.field.fieldCells) {
                 this.lives--;
                 this.resetSnake(newBody);
             }
 
-            // Столкновение с хвостом
+            // Столкновение с хвостом.
             for (let i = 0; i < this.snake.shakeLength; i++) {
                 for (let j = 0; j < this.snake.shakeLength; j++) {
                     if (j === i) {
@@ -321,7 +319,7 @@ Vue.component('snake', {
                 newBody = [];
             }
 
-            // Если длинна объекта для отрисовки не совпадает с длинной обхекта змейки,
+            // Если длинна объекта для отрисовки не совпадает с длинной объекта змейки,
             // обновляем его.
             if (newBody.length !== this.snake.shakeLength) {
                 newBody = [];
@@ -334,7 +332,7 @@ Vue.component('snake', {
                 }
             }
 
-            // Если количесов секций змейки больше, чем ее длинна, отризаем лишнее.
+            // Если количеств секций змейки больше, чем ее длинна, отрезаем лишнее.
             if (this.snake.body.length > this.snake.shakeLength) {
                 this.snake.body = this.snake.body.slice(0, this.snake.shakeLength);
             }
@@ -378,5 +376,4 @@ Vue.component('snake', {
         this.initDot();
         this.startGame();
     }
-})
-;
+});
