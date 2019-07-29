@@ -7,24 +7,24 @@ Vue.component('snake', {
             startTimeInterval: 120,
             score: 0,
             snake: {
-                shakeLength: 5,
+                shakeLength: 3,
                 body: [this.shakeLength]
             },
             dot: {
                 isRendered: false
             },
             field: {
-                fieldRows: 50,
-                fieldCells: 50,
+                fieldRows: 30,
+                fieldCells: 30,
                 cells: [this.fieldRows]
             }
         }
     },
     watch: {
+        // Следим за очками и каждый раз, как набрали 100 новых,
+        // ускоряем темп.
         score: function (val) {
             if (val % 100 === 0) {
-                debugger;
-
                 clearInterval(this.setInterval);
                 this.startTimeInterval -= 20;
                 this.startGame();
@@ -40,22 +40,32 @@ Vue.component('snake', {
             let self = this;
 
             document.addEventListener('keyup', function (evt) {
+                debugger;
+
                 switch (evt.keyCode) {
+                    // Пробел (пауза).
+                    case 32:
+                        self.pauseGame();
+                        break;
+                    // Влево.
                     case 37:
                         if (self.direction !== 'right') {
                             self.direction = 'left';
                         }
                         break;
+                    // Вверх.
                     case 38:
                         if (self.direction !== 'bottom') {
                             self.direction = 'top';
                         }
                         break;
+                    // Вправо.
                     case 39:
                         if (self.direction !== 'left') {
                             self.direction = 'right';
                         }
                         break;
+                    // Вниз.
                     case 40:
                         if (self.direction !== 'top') {
                             self.direction = 'bottom';
@@ -79,15 +89,27 @@ Vue.component('snake', {
          * Инициализация змейки.
          */
         initSnake: function () {
-            let startRow = this.field.fieldRows / 2;
-            let startCell = this.field.fieldCells / 2;
+            this.direction = 'left';
 
-            for (let snakeBody = 0; snakeBody < this.snake.shakeLength; snakeBody++) {
-                // Координаты каждой секции змейки.
-                this.snake.body[snakeBody] = {
-                    row: startRow,
-                    cell: startCell + snakeBody
-                };
+            let row = this.field.fieldRows / 2;
+            let cell = this.field.fieldCells / 2;
+
+            for (let i = 0; i < this.snake.shakeLength; i++) {
+                if (this.snake.body[i]) {
+                    this.setCell(this.snake.body[i].row, this.snake.body[i].cell, 'none');
+                }
+
+                if (cell < this.field.fieldCells - 1) {
+                    this.snake.body[i] = {
+                        row: row,
+                        cell: cell++
+                    };
+                } else {
+                    this.snake.body[i] = {
+                        row: row++,
+                        cell: cell
+                    };
+                }
             }
         },
 
@@ -118,6 +140,26 @@ Vue.component('snake', {
          */
         startGame: function () {
             this.setInterval = setInterval(this.tick, this.startTimeInterval);
+        },
+
+        /**
+         * Ставим игру на паузу.
+         */
+        pauseGame: function () {
+            if (this.setInterval) {
+                clearInterval(this.setInterval);
+                this.setInterval = null;
+            } else {
+                this.startGame();
+            }
+        },
+
+        /**
+         * Обновляем скорость игры.
+         */
+        updateInterval: function () {
+            clearInterval(this.setInterval);
+            this.startGame();
         },
 
         /**
@@ -175,6 +217,10 @@ Vue.component('snake', {
          * Отрисовываем поле.
          */
         renderField: function (newBody) {
+            if (!newBody || newBody.length !== this.snake.shakeLength) {
+                return;
+            }
+
             // Рисуем точку если требуется.
             if (!this.dot.isRendered) {
                 this.setCell(this.dot.row, this.dot.cell, 'dot');
@@ -211,14 +257,21 @@ Vue.component('snake', {
          * Проверка на столкновения.
          */
         collisionCheck: function (newBody) {
+            if (!newBody || newBody.length !== this.snake.shakeLength) {
+                return;
+            }
+
+            // Столкновение с потолком или полом
             if (newBody[0].row < 0 || newBody[0].row >= this.field.fieldRows) {
                 this.resetSnake(newBody);
             }
 
+            // Столкноевение со стенами
             if (newBody[0].cell < 0 || newBody[0].cell >= this.field.fieldCells) {
                 this.resetSnake(newBody);
             }
 
+            // Столкновение с хвостом
             for (let i = 0; i < this.snake.shakeLength; i++) {
                 for (let j = 0; j < this.snake.shakeLength; j++) {
                     if (j === i) {
@@ -239,23 +292,62 @@ Vue.component('snake', {
          * Сбрасываем змейку.
          */
         resetSnake: function (newBody) {
-            for (let i = 0; i < this.snake.shakeLength; i++) {
-                this.setCell(this.snake.body[i].row, this.snake.body[i].cell, 'none');
-
-                this.snake.body[i].row = this.field.fieldRows / 2;
-                this.snake.body[i].cell = this.field.fieldRows / 2 + i;
-
-                newBody[i].row = this.field.fieldRows / 2;
-                newBody[i].cell = this.field.fieldRows / 2 + i;
+            // Находим все секции змейки и стриаем их.
+            for (let row = 0; row < this.field.fieldRows; row++) {
+                for (let cell = 0; cell < this.field.fieldCells; cell++) {
+                    if (this.field.cells[row][cell].status === 'snake') {
+                        this.setCell(row, cell, 'none');
+                    }
+                }
             }
 
-            this.direction = 'left';
+            // Если объект для отрисовки не задан, инициализируем его.
+            if (!newBody) {
+                newBody = [];
+            }
+
+            // Если длинна объекта для отрисовки не совпадает с длинной обхекта змейки,
+            // обновляем его.
+            if (newBody.length !== this.snake.shakeLength) {
+                newBody = [];
+
+                for (let i = 0; i < this.snake.shakeLength; i++) {
+                    newBody[i] = {
+                        row: null,
+                        cell: null
+                    }
+                }
+            }
+
+            // Если количесов секций змейки больше, чем ее длинна, отризаем лишнее.
+            if (this.snake.body.length > this.snake.shakeLength) {
+                this.snake.body = this.snake.body.slice(0, this.snake.shakeLength);
+            }
+
+            // Заново инициализируем змейку.
+            this.initSnake();
+
+            // Обновляем объект для отрисовки.
+            for (let i = 0; i < this.snake.shakeLength; i++) {
+                newBody[i].row = this.snake.body[i].row;
+                newBody[i].cell = this.snake.body[i].cell;
+            }
         },
 
         /**
          * Задаем статус ячейки.
          */
         setCell: function (row, cell, status) {
+            if (row === undefined || cell === undefined) {
+                console.error("Не заданы координаты ячейки.");
+                return;
+            }
+
+            if (!status) {
+                console.error("Не задан статус ячейки.");
+                return;
+            }
+
             let changedRow = this.field.cells[row];
             Vue.set(changedRow, cell, {status: status});
             Vue.set(this.field.cells, row, changedRow);
