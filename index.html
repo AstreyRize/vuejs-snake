@@ -39,25 +39,37 @@
         </div>
     </login-form>
     <snake inline-template>
-        <div class="row d-flex justify-content-center">
+        <div v-if="showComponent" class="row d-flex justify-content-center">
             <div class="col-sm-auto">
-                <div v-if="showComponent" class="snake">
+                <div class="snake">
                     <table>
                         <tr v-for="row in field.cells">
                             <td v-for="cell in row" :class="cell.status">
                             </td>
                         </tr>
                     </table>
-                    <button type="button" class="btn btn-dark float-sm-right pauseButton">Pause</button>
+                    <button type="button" class="btn btn-dark float-sm-right pauseButton" @click="pauseGame">
+                        Pause (Space)
+                    </button>
                 </div>
             </div>
             <div class="col-sm-2 info">
+                <div class="lives">
+                    <div class='heart' v-for="live in lives">
+                        <table>
+                            <tr v-for="tr in 7">
+                                <td v-for="td in 9"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
                 <h5>score: {{score}}</h5>
                 <h5>speed: {{startTimeInterval}}</h5>
-                <input @change="updateInterval" v-model="startTimeInterval" type="range" min="45" max="120"
+                <input @change="updateInterval" v-model="startTimeInterval" type="range" min="40" max="120"
                        class="custom-range" id="speedRange">
                 <h5>snake length: {{snake.shakeLength}}</h5>
-                <input @change="resetSnake" v-model.number="snake.shakeLength" type="range" min="3" max="20"
+                <input @change="resetSnake" v-model.number="snake.shakeLength" type="range" min="3" max="100"
                        class="custom-range" id="shakeLength">
             </div>
         </div>

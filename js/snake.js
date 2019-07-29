@@ -1,6 +1,7 @@
 Vue.component('snake', {
     data: function () {
         return {
+            lives: 3,
             showComponent: true,
             setInterval: null,
             direction: 'left',
@@ -14,8 +15,8 @@ Vue.component('snake', {
                 isRendered: false
             },
             field: {
-                fieldRows: 30,
-                fieldCells: 30,
+                fieldRows: 36,
+                fieldCells: 36,
                 cells: [this.fieldRows]
             }
         }
@@ -28,6 +29,13 @@ Vue.component('snake', {
                 clearInterval(this.setInterval);
                 this.startTimeInterval -= 20;
                 this.startGame();
+            }
+        },
+        // Следим за жизнями
+        lives: function (val) {
+            if (val <= -1) {
+                clearInterval(this.setInterval);
+                this.showComponent = false;
             }
         }
     },
@@ -99,15 +107,20 @@ Vue.component('snake', {
                     this.setCell(this.snake.body[i].row, this.snake.body[i].cell, 'none');
                 }
 
-                if (cell < this.field.fieldCells - 1) {
+                if (cell < this.field.fieldCells - 1 && row < this.field.fieldRows - 1) {
                     this.snake.body[i] = {
                         row: row,
                         cell: cell++
                     };
-                } else {
+                } else if (row < this.field.fieldRows - 1) {
                     this.snake.body[i] = {
                         row: row++,
                         cell: cell
+                    };
+                } else {
+                    this.snake.body[i] = {
+                        row: row,
+                        cell: cell--
                     };
                 }
             }
@@ -263,11 +276,13 @@ Vue.component('snake', {
 
             // Столкновение с потолком или полом
             if (newBody[0].row < 0 || newBody[0].row >= this.field.fieldRows) {
+                this.lives--;
                 this.resetSnake(newBody);
             }
 
             // Столкноевение со стенами
             if (newBody[0].cell < 0 || newBody[0].cell >= this.field.fieldCells) {
+                this.lives--;
                 this.resetSnake(newBody);
             }
 
@@ -280,8 +295,8 @@ Vue.component('snake', {
 
                     if (newBody[i].row === newBody[j].row &&
                         newBody[i].cell === newBody[j].cell) {
+                        this.lives--;
                         this.resetSnake(newBody);
-
                         break;
                     }
                 }
